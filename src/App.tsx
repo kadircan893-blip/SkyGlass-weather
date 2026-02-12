@@ -243,11 +243,10 @@ setError(() => null);
 
 
   useEffect(() => {
-    const rain = new Audio("/src/assets/sfx/rain.mp3");
-    const snow = new Audio("/src/assets/sfx/snow.mp3");
-    const wind = new Audio("/src/assets/sfx/wind.mp3");
-    const birds = new Audio("/src/assets/sfx/birds.mp3");
-
+    const rain = new Audio("/sfx/rain.mp3");
+const snow = new Audio("/sfx/snow.mp3");
+const wind = new Audio("/sfx/wind.mp3");
+const birds = new Audio("/sfx/birds.mp3");
     for (const a of [rain, snow, wind]) {
       a.loop = true;
       a.volume = 0.25;
