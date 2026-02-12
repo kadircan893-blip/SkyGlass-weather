@@ -185,6 +185,7 @@ function drawSunGlints(ctx: CanvasRenderingContext2D, p: Extract<Particle, { kin
 }
 
 function App() {
+  
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const rafRef = useRef<number | null>(null);
   const particlesRef = useRef<Particle[]>([]);
@@ -199,13 +200,24 @@ function App() {
 
   
   const [muted, setMuted] = useState(true);
-  const [audioUnlocked, setAudioUnlocked] = useState(false);
-  const sfxRef = useRef<{
-    rain: HTMLAudioElement;
-    snow: HTMLAudioElement;
-    wind: HTMLAudioElement;
-    birds: HTMLAudioElement;
-  } | null>(null);
+const [audioUnlocked, setAudioUnlocked] = useState(false);
+
+useEffect(() => {
+  const unlock = () => setAudioUnlocked(true);
+
+  window.addEventListener("click", unlock, { once: true });
+
+  return () => {
+    window.removeEventListener("click", unlock);
+  };
+}, []);
+
+const sfxRef = useRef<{
+  rain: HTMLAudioElement;
+  snow: HTMLAudioElement;
+  wind: HTMLAudioElement;
+  birds: HTMLAudioElement;
+} | null>(null);
 
   const skyMode = useMemo(() => pickSkyMode(currentWeather), [currentWeather]);
   const bg = useMemo(() => bgClassFromMode(skyMode), [skyMode]);
