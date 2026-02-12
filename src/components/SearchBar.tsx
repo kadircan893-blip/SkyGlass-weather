@@ -1,5 +1,3 @@
-
-
 import { useState } from "react";
 import trCities from "../utils/trCities";
 
@@ -12,15 +10,21 @@ export default function SearchBar({ onCitySelect }: Props) {
   const [results, setResults] = useState<string[]>([]);
 
   function handleChange(value: string) {
-    setQuery(value);
+    // 🔒 Sadece harf ve boşluk
+    const onlyLetters = value.replace(/[^a-zA-ZğüşöçıİĞÜŞÖÇ\s]/g, "");
 
-    if (!value.trim()) {
+    setQuery(onlyLetters);
+
+    if (!onlyLetters.trim()) {
       setResults([]);
       return;
     }
 
+    // 🇹🇷 Türkçe locale karşılaştırma (i / İ sorunu çözülür)
+    const search = onlyLetters.toLocaleLowerCase("tr-TR");
+
     const filtered = trCities.filter((c) =>
-      c.toLowerCase().includes(value.toLowerCase())
+      c.toLocaleLowerCase("tr-TR").includes(search)
     );
 
     setResults(filtered.slice(0, 8));
@@ -38,6 +42,8 @@ export default function SearchBar({ onCitySelect }: Props) {
         value={query}
         onChange={(e) => handleChange(e.target.value)}
         placeholder="Şehir ara (Türkiye)"
+        inputMode="text"
+        pattern="[A-Za-zğüşöçıİĞÜŞÖÇ\s]+"
         className="w-full px-5 py-3 rounded-2xl bg-white/10 border border-white/20 backdrop-blur text-white outline-none transition-all duration-300 ease-out focus:border-white/50 focus:shadow-[0_0_25px_rgba(255,255,255,0.15)]"
       />
 
