@@ -1,5 +1,3 @@
-
-
 import { useEffect, useMemo, useRef, useState } from "react";
 import Header from "./components/Header";
 import SearchBar from "./components/SearchBar";
@@ -24,7 +22,8 @@ function pickSkyMode(weather: CurrentWeather | null): SkyMode {
   const has = (arr: string[]) => arr.some((k) => t.includes(k));
 
   if (has(["snow", "kar", "sleet", "blizzard", "buz"])) return "snow";
-  if (has(["rain", "yağmur", "drizzle", "shower", "sağanak", "thunder", "storm", "fırtına"])) return "rain";
+  if (has(["rain", "yağmur", "drizzle", "shower", "sağanak", "thunder", "storm", "fırtına"]))
+    return "rain";
   if (has(["partly", "parçalı", "scattered", "broken"])) return "partly";
   if (has(["cloud", "bulut", "overcast", "çok bulut"])) return "cloudy";
   return "clear";
@@ -45,7 +44,6 @@ function bgClassFromMode(mode: SkyMode) {
       return "from-slate-950 via-slate-900 to-slate-950";
   }
 }
-
 
 type Particle =
   | {
@@ -99,14 +97,12 @@ function rand(min: number, max: number) {
 }
 
 function layerAlpha(layer: 0 | 1 | 2) {
- 
   if (layer === 0) return 0.35;
   if (layer === 1) return 0.55;
   return 0.8;
 }
 
 function drawSoftCloud(ctx: CanvasRenderingContext2D, p: Extract<Particle, { kind: "cloud" }>) {
-  
   ctx.save();
   ctx.globalAlpha = p.alpha;
   ctx.filter = "none";
@@ -118,7 +114,6 @@ function drawSoftCloud(ctx: CanvasRenderingContext2D, p: Extract<Particle, { kin
   const w = p.w;
   const h = p.h;
 
-  
   const grad = ctx.createLinearGradient(x, y, x + w, y + h);
   grad.addColorStop(0, "rgba(255,255,255,0.85)");
   grad.addColorStop(1, "rgba(210,225,255,0.55)");
@@ -132,11 +127,10 @@ function drawSoftCloud(ctx: CanvasRenderingContext2D, p: Extract<Particle, { kin
   ];
 
   ctx.beginPath();
- 
+
   const baseY = y + h * 0.72;
   ctx.roundRect(x + w * 0.12, baseY - h * 0.22, w * 0.78, h * 0.32, h * 0.18);
 
-  
   for (const b of bumps) {
     const cx = x + w * b.ox;
     const cy = y + h * b.oy;
@@ -154,11 +148,9 @@ function drawSunGlints(ctx: CanvasRenderingContext2D, p: Extract<Particle, { kin
   const pulse = (Math.sin(t * p.pulseSpeed + p.pulse) + 1) * 0.5; // 0..1
   const a = p.alpha * (0.35 + 0.65 * pulse);
 
-  
   ctx.globalAlpha = a;
   const r = p.r * (0.8 + pulse * 0.6);
 
- 
   const g = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, r);
   g.addColorStop(0, "rgba(255,255,255,0.95)");
   g.addColorStop(0.25, "rgba(255,230,160,0.55)");
@@ -185,7 +177,6 @@ function drawSunGlints(ctx: CanvasRenderingContext2D, p: Extract<Particle, { kin
 }
 
 function App() {
-  
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const rafRef = useRef<number | null>(null);
   const particlesRef = useRef<Particle[]>([]);
@@ -198,36 +189,24 @@ function App() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  
   const [muted, setMuted] = useState(true);
-const [audioUnlocked, setAudioUnlocked] = useState(false);
+  const [audioUnlocked, setAudioUnlocked] = useState(false);
 
-useEffect(() => {
-  const unlock = () => setAudioUnlocked(true);
-
-  window.addEventListener("click", unlock, { once: true });
-
-  return () => {
-    window.removeEventListener("click", unlock);
-  };
-}, []);
-
-const sfxRef = useRef<{
-  rain: HTMLAudioElement;
-  snow: HTMLAudioElement;
-  wind: HTMLAudioElement;
-  birds: HTMLAudioElement;
-} | null>(null);
+  const sfxRef = useRef<{
+    rain: HTMLAudioElement;
+    snow: HTMLAudioElement;
+    wind: HTMLAudioElement;
+    birds: HTMLAudioElement;
+  } | null>(null);
 
   const skyMode = useMemo(() => pickSkyMode(currentWeather), [currentWeather]);
   const bg = useMemo(() => bgClassFromMode(skyMode), [skyMode]);
-
 
   useEffect(() => {
     if (!selectedCity) return;
 
     setLoading(true);
-setError(() => null);
+    setError(() => null);
     Promise.all([getCurrentWeather(selectedCity), getForecast(selectedCity)])
       .then(([cw, fc]) => {
         setCurrentWeather(cw);
@@ -241,12 +220,18 @@ setError(() => null);
       .finally(() => setLoading(false));
   }, [selectedCity]);
 
-
   useEffect(() => {
     const rain = new Audio("/sfx/rain.mp3");
-const snow = new Audio("/sfx/snow.mp3");
-const wind = new Audio("/sfx/wind.mp3");
-const birds = new Audio("/sfx/birds.mp3");
+    const snow = new Audio("/sfx/snow.mp3");
+    const wind = new Audio("/sfx/wind.mp3");
+    const birds = new Audio("/sfx/birds.mp3");
+
+    // preload
+    rain.load();
+    snow.load();
+    wind.load();
+    birds.load();
+
     for (const a of [rain, snow, wind]) {
       a.loop = true;
       a.volume = 0.25;
@@ -282,7 +267,6 @@ const birds = new Audio("/sfx/birds.mp3");
   }
 
   useEffect(() => {
-   
     if (!audioUnlocked || muted) {
       stopAllSfx();
       return;
@@ -293,13 +277,9 @@ const birds = new Audio("/sfx/birds.mp3");
 
     stopAllSfx();
 
-   
     if (skyMode === "rain") playLoop(s.rain);
     else if (skyMode === "snow") playLoop(s.snow);
-    else if (skyMode === "clear")
-      
-      
-      {
+    else if (skyMode === "clear") {
       const id = window.setInterval(() => {
         if (muted) return;
         s.birds.currentTime = 0;
@@ -307,7 +287,6 @@ const birds = new Audio("/sfx/birds.mp3");
       }, 12000);
       return () => window.clearInterval(id);
     } else if (skyMode === "cloudy" || skyMode === "partly") {
-      
       playLoop(s.wind);
       s.wind.volume = 0.15;
     }
@@ -315,9 +294,26 @@ const birds = new Audio("/sfx/birds.mp3");
     return () => {};
   }, [skyMode, muted, audioUnlocked]);
 
+  // ✅ IMPORTANT: start audio INSIDE the user click handler (gesture-safe)
   const onToggleMute = () => {
-   
-    if (!audioUnlocked) setAudioUnlocked(true);
+    const s = sfxRef.current;
+
+    // If we are currently muted and user is trying to unmute,
+    // kick off one play() inside this click handler to satisfy autoplay policies.
+    if (muted && s) {
+      setAudioUnlocked(true);
+
+      stopAllSfx();
+
+      if (skyMode === "rain") s.rain.play().catch(() => {});
+      else if (skyMode === "snow") s.snow.play().catch(() => {});
+      else if (skyMode === "cloudy" || skyMode === "partly") s.wind.play().catch(() => {});
+      else if (skyMode === "clear") s.birds.play().catch(() => {});
+    } else {
+      // still mark as unlocked on any toggle
+      if (!audioUnlocked) setAudioUnlocked(true);
+    }
+
     setMuted((m) => !m);
   };
 
@@ -331,7 +327,6 @@ const birds = new Audio("/sfx/birds.mp3");
     return "none";
   }, [currentWeather, skyMode]);
 
- 
   function buildParticles(mode: FxMode, w: number, h: number) {
     const parts: Particle[] = [];
 
@@ -370,7 +365,7 @@ const birds = new Audio("/sfx/birds.mp3");
       pushLayers(count, (layer) => {
         const len = layer === 2 ? rand(14, 26) : layer === 1 ? rand(12, 22) : rand(10, 18);
         const vy = layer === 2 ? rand(700, 1000) : layer === 1 ? rand(600, 900) : rand(520, 820);
-        const vx = rand(-90, -40); 
+        const vx = rand(-90, -40);
         return {
           kind: "rain",
           x: rand(0, w),
@@ -432,7 +427,7 @@ const birds = new Audio("/sfx/birds.mp3");
 
   useEffect(() => {
     modeRef.current = fxMode;
-   
+
     const c = canvasRef.current;
     if (!c) return;
     const w = c.width;
@@ -440,7 +435,6 @@ const birds = new Audio("/sfx/birds.mp3");
     particlesRef.current = buildParticles(fxMode, w, h);
   }, [fxMode]);
 
-  
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -457,7 +451,6 @@ const birds = new Audio("/sfx/birds.mp3");
       canvas.style.width = `${window.innerWidth}px`;
       canvas.style.height = `${window.innerHeight}px`;
 
-    
       particlesRef.current = buildParticles(modeRef.current, w, h);
     };
 
@@ -467,7 +460,7 @@ const birds = new Audio("/sfx/birds.mp3");
     const tick = (ts: number) => {
       const t = ts / 1000;
       const last = lastTimeRef.current || ts;
-      const dt = clamp((ts - last) / 1000, 0.001, 0.033); 
+      const dt = clamp((ts - last) / 1000, 0.001, 0.033);
       lastTimeRef.current = ts;
 
       const w = canvas.width;
@@ -475,7 +468,6 @@ const birds = new Audio("/sfx/birds.mp3");
 
       ctx.clearRect(0, 0, w, h);
 
-     
       if (modeRef.current === "rain" || modeRef.current === "snow") {
         ctx.save();
         ctx.globalAlpha = modeRef.current === "rain" ? 0.08 : 0.06;
@@ -624,7 +616,7 @@ const birds = new Audio("/sfx/birds.mp3");
             {selectedCity && !loading && !error && currentWeather && (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <CurrentWeatherCard weather={currentWeather} />
-               <Forecast3Day forecast={forecast.slice(1)} />
+                <Forecast3Day forecast={forecast.slice(1)} />
               </div>
             )}
           </div>
